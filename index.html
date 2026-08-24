@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Connect Mini-App</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; padding: 20px; margin: 0; }
+        .card { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        h2 { color: #38bdf8; }
+        button { background: #38bdf8; color: #0f172a; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Task Connect</h1>
+    <div class="card">
+        <h3>Aapka Balance: <span id="balance">0</span> Coins</h3>
+    </div>
+
+    <h2>Available Tasks</h2>
+    <div id="taskList">Loading tasks...</div>
+
+    <script>
+        // Backend API URL
+        const API_URL = 'https://task-connect-backend-production.up.railway.app';
+
+        // Tasks load karne ka function
+        async function loadTasks() {
+            try {
+                let response = await fetch(`${API_URL}/api/tasks`);
+                let tasks = await response.json();
+                
+                let taskListDiv = document.getElementById('taskList');
+                taskListDiv.innerHTML = '';
+
+                if (tasks.length === 0) {
+                    taskListDiv.innerHTML = '<p>Filhal koi task mojood nahi hai.</p>';
+                    return;
+                }
+
+                tasks.forEach(task => {
+                    let taskCard = document.createElement('div');
+                    taskCard.className = 'card';
+                    taskCard.innerHTML = `
+                        <h3>${task.title}</h3>
+                        <p>${task.description}</p>
+                        <p><b>Reward:</b> ${task.reward} Coins</p>
+                        <a href="${task.link}" target="_blank"><button>Start Task</button></a>
+                    `;
+                    taskListDiv.appendChild(taskCard);
+                });
+            } catch (err) {
+                console.error('Error loading tasks:', err);
+                document.getElementById('taskList').innerHTML = '<p>Tasks load karne mein masla aaya hai.</p>';
+            }
+        }
+
+        loadTasks();
+    </script>
+
+</body>
+  </html>
