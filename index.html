@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Connect - Cyberpunk Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #05050a; color: #00ffcc; font-family: monospace; }
+    .neon-border { border: 1px solid #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); }
+    .neon-btn { background: #00ffcc; color: #05050a; font-weight: bold; box-shadow: 0 0 10px #00ffcc; transition: 0.2s; }
+    .neon-btn:hover { background: #ff007f; color: #fff; box-shadow: 0 0 15px #ff007f; }
+  </style>
+</head>
+<body class="p-4 max-w-md mx-auto min-h-screen flex flex-col justify-between">
+
+  <!-- AUTH CONTAINER -->
+  <div id="auth-container" class="my-auto neon-border p-6 rounded-xl bg-black/80">
+    <h1 class="text-3xl font-extrabold text-center mb-6 text-pink-500 tracking-wider">TASK CONNECT</h1>
+    
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2 class="text-xl mb-4 text-cyan-400">LOGIN</h2>
+      <input type="email" id="login-email" placeholder="Email" class="w-full p-3 mb-3 bg-gray-900 border border-cyan-500 rounded text-white">
+      <input type="password" id="login-password" placeholder="Password" class="w-full p-3 mb-4 bg-gray-900 border border-cyan-500 rounded text-white">
+      <button onclick="loginUser()" class="w-full p-3 neon-btn rounded">LOGIN</button>
+      <p class="mt-4 text-center text-sm">Don't have an account? <span onclick="toggleAuth()" class="text-pink-500 cursor-pointer underline">Sign Up</span></p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <h2 class="text-xl mb-4 text-pink-500">SIGN UP</h2>
+      <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-3 mb-3 bg-gray-900 border border-pink-500 rounded text-white">
+      <input type="email" id="reg-email" placeholder="Email" class="w-full p-3 mb-3 bg-gray-900 border border-pink-500 rounded text-white">
+      <input type="password" id="reg-password" placeholder="Password (min 8 chars)" class="w-full p-3 mb-3 bg-gray-900 border border-pink-500 rounded text-white">
+      <input type="text" id="reg-ref" placeholder="Referral Code (Optional)" class="w-full p-3 mb-4 bg-gray-900 border border-pink-500 rounded text-white">
+      <button onclick="registerUser()" class="w-full p-3 bg-pink-500 text-white font-bold rounded shadow-[0_0_10px_#ff007f]">REGISTER</button>
+      <p class="mt-4 text-center text-sm">Already have an account? <span onclick="toggleAuth()" class="text-cyan-400 cursor-pointer underline">Login</span></p>
+    </div>
+  </div>
+
+  <!-- APP CONTAINER -->
+  <div id="app-container" class="hidden flex flex-col min-h-screen justify-between">
+    <div>
+      <div class="flex justify-between items-center mb-4 border-b border-cyan-500 pb-3">
+        <div>
+          <h2 id="user-display-name" class="font-bold text-lg text-white">User</h2>
+          <p class="text-xs text-cyan-400">Points: <span id="user-points">0</span></p>
+        </div>
+        <button onclick="logout()" class="text-xs px-3 py-1 border border-pink-500 text-pink-500 rounded">Logout</button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex gap-2 mb-4">
+        <button onclick="switchTab('tasks')" class="flex-1 py-2 text-xs border border-cyan-500 rounded bg-cyan-950" id="tab-tasks">Tasks</button>
+        <button onclick="switchTab('wallet')" class="flex-1 py-2 text-xs border border-cyan-500 rounded" id="tab-wallet">Wallet</button>
+        <button onclick="switchTab('chat')" class="flex-1 py-2 text-xs border border-cyan-500 rounded" id="tab-chat">Chat</button>
+        <button onclick="switchTab('admin')" id="admin-tab-btn" class="hidden flex-1 py-2 text-xs border border-pink-500 text-pink-400 rounded">Admin</button>
+      </div>
+
+      <!-- Tasks Tab -->
+      <div id="section-tasks" class="space-y-3">
+        <h3 class="text-cyan-400 font-bold">Available Tasks</h3>
+        <div id="tasks-list" class="space-y-2"></div>
+      </div>
+
+      <!-- Wallet Tab -->
+      <div id="section-wallet" class="hidden space-y-4">
+        <h3 class="text-cyan-400 font-bold">Withdraw Points</h3>
+        <div class="neon-border p-4 rounded bg-black/50 space-y-3">
+          <input type="number" id="w-points" placeholder="Points to withdraw" class="w-full p-2 bg-gray-900 border border-cyan-500 rounded text-white">
+          <select id="w-gateway" class="w-full p-2 bg-gray-900 border border-cyan-500 rounded text-white">
+            <option value="JazzCash">JazzCash</option>
+            <option value="EasyPaisa">EasyPaisa</option>
+          </select>
+          <input type="text" id="w-account" placeholder="Account Number / Phone" class="w-full p-2 bg-gray-900 border border-cyan-500 rounded text-white">
+          <button onclick="requestWithdrawal()" class="w-full p-2 neon-btn rounded">Submit Request</button>
+        </div>
+      </div>
+
+      <!-- Chat Tab -->
+      <div id="section-chat" class="hidden space-y-3">
+        <h3 class="text-cyan-400 font-bold">Community Chat</h3>
+        <div id="chat-messages" class="h-64 overflow-y-auto border border-cyan-500 p-2 rounded bg-black/40 text-xs space-y-2"></div>
+        <div class="flex gap-2">
+          <input type="text" id="chat-input" placeholder="Type message..." class="flex-1 p-2 bg-gray-900 border border-cyan-500 rounded text-white text-xs">
+          <button onclick="sendMessage()" class="px-4 py-2 neon-btn text-xs rounded">Send</button>
+        </div>
+      </div>
+
+      <!-- Admin Panel Tab -->
+      <div id="section-admin" class="hidden space-y-4">
+        <h3 class="text-pink-500 font-bold text-lg border-b border-pink-500 pb-1">ADMIN PANEL CONTROL</h3>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="border border-pink-500 p-2 rounded"><p class="text-xs">Users</p><span id="admin-users-count" class="font-bold text-white">0</span></div>
+          <div class="border border-pink-500 p-2 rounded"><p class="text-xs">Tasks</p><span id="admin-tasks-count" class="font-bold text-white">0</span></div>
+          <div class="border border-pink-500 p-2 rounded"><p class="text-xs">Pending W/D</p><span id="admin-wd-count" class="font-bold text-white">0</span></div>
+        </div>
+
+        <!-- Add Task Form -->
+        <div class="border border-pink-500 p-3 rounded bg-black/50 space-y-2">
+          <h4 class="text-xs text-pink-400 font-bold">Add New Task</h4>
+          <input type="text" id="adm-title" placeholder="Task Title" class="w-full p-2 bg-gray-900 border border-pink-500 rounded text-white text-xs">
+          <input type="text" id="adm-category" placeholder="Category (Social/Gaming)" class="w-full p-2 bg-gray-900 border border-pink-500 rounded text-white text-xs">
+          <input type="number" id="adm-reward" placeholder="Reward Points" class="w-full p-2 bg-gray-900 border border-pink-500 rounded text-white text-xs">
+          <input type="text" id="adm-link" placeholder="Task Link URL" class="w-full p-2 bg-gray-900 border border-pink-500 rounded text-white text-xs">
+          <button onclick="adminAddTask()" class="w-full py-2 bg-pink-500 text-white text-xs font-bold rounded">Create Task</button>
+        </div>
+
+        <!-- Users Management -->
+        <div>
+          <h4 class="text-xs text-pink-400 font-bold mb-2">Manage Users</h4>
+          <div id="admin-users-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
+        </div>
+
+        <!-- Withdrawals Management -->
+        <div>
+          <h4 class="text-xs text-pink-400 font-bold mb-2">Pending Withdrawals</h4>
+          <div id="admin-wd-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+
+    </div>
+    <footer class="text-center text-[10px] text-gray-500 mt-4">Task Connect © 2026</footer>
+  </div>
+
+  <script>
+    let token = localStorage.getItem("tc_token") || "";
+
+    function toggleAuth() {
+      document.getElementById("login-form").classList.toggle("hidden");
+      document.getElementById("register-form").classList.toggle("hidden");
+    }
+
+    async function registerUser() {
+      const name = document.getElementById("reg-name").value;
+      const email = document.getElementById("reg-email").value;
+      const password = document.getElementById("reg-password").value;
+      const referralCode = document.getElementById("reg-ref").value;
+
+      const res = await fetch("/auth/register", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, referralCode })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        token = data.token;
+        localStorage.setItem("tc_token", token);
+        initApp();
+      } else { alert(data.error); }
+    }
+
+    async function loginUser() {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      const res = await fetch("/auth/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        token = data.token;
+        localStorage.setItem("tc_token", token);
+        initApp();
+      } else { alert(data.error); }
+    }
+
+    function logout() {
+      localStorage.removeItem("tc_token");
+      location.reload();
+    }
+
+    async function initApp() {
+      const res = await fetch("/user/me", { headers: { "Authorization": "Bearer " + token } });
+      if (!res.ok) { logout(); return; }
+      const user = await res.json();
+
+      document.getElementById("auth-container").classList.add("hidden");
+      document.getElementById("app-container").classList.remove("hidden");
+      document.getElementById("user-display-name").innerText = user.name;
+      document.getElementById("user-points").innerText = user.points;
+
+      if (user.role === "admin") {
+        document.getElementById("admin-tab-btn").classList.remove("hidden");
+        loadAdminData();
+      }
+
+      loadTasks();
+    }
+
+    function switchTab(tab) {
+      ['tasks', 'wallet', 'chat', 'admin'].forEach(t => {
+        document.getElementById(`section-${t}`).classList.add("hidden");
+        const btn = document.getElementById(`tab-${t}`);
+        if(btn) btn.classList.remove("bg-cyan-950");
+      });
+      document.getElementById(`section-${tab}`).classList.remove("hidden");
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if(activeBtn) activeBtn.classList.add("bg-cyan-950");
+      if(tab === 'chat') loadChat();
+    }
+
+    async function loadTasks() {
+      const res = await fetch("/tasks", { headers: { "Authorization": "Bearer " + token } });
+      const data = await res.json();
+      const list = document.getElementById("tasks-list");
+      list.innerHTML = data.tasks.map(t => `
+        <div class="border border-cyan-500 p-3 rounded flex justify-between items-center bg-black/40">
+          <div>
+            <h4 class="font-bold text-white text-sm">${t.title}</h4>
+            <p class="text-xs text-cyan-400">Reward: +${t.reward} pts | ${t.category}</p>
+          </div>
+          ${t.completed ? '<span class="text-xs text-green-400">Done</span>' : `<button onclick="completeTask('${t.id}', '${t.link}')" class="px-3 py-1 neon-btn text-xs rounded">Start</button>`}
+        </div>
+      `).join('');
+    }
+
+    async function completeTask(id, link) {
+      if(link) window.open(link, '_blank');
+      const res = await fetch(`/tasks/${id}/complete`, { method: "POST", headers: { "Authorization": "Bearer " + token } });
+      const data = await res.json();
+      if(res.ok) {
+        alert(`Task completed! Earned ${data.earned} points.`);
+        initApp();
+      } else { alert(data.error); }
+    }
+
+    async function requestWithdrawal() {
+      const amountPoints = parseInt(document.getElementById("w-points").value);
+      const gateway = document.getElementById("w-gateway").value;
+      const accountNumber = document.getElementById("w-account").value;
+
+      const res = await fetch("/wallet/withdraw", {
+        method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ amountPoints, gateway, accountNumber })
+      });
+      const data = await res.json();
+      if(res.ok) { alert(data.message); initApp(); } else { alert(data.error); }
+    }
+
+    async function loadChat() {
+      const res = await fetch("/chat/messages", { headers: { "Authorization": "Bearer " + token } });
+      const data = await res.json();
+      const box = document.getElementById("chat-messages");
+      box.innerHTML = data.messages.map(m => `<div><span class="text-pink-400 font-bold">${m.name}:</span> ${m.text}</div>`).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = document.getElementById("chat-input").value;
+      const res = await fetch("/chat/messages", {
+        method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      if(res.ok) {
+        document.getElementById("chat-input").value = "";
+        loadChat();
+      } else { alert(data.error); }
+    }
+
+    async function loadAdminData() {
+      const statsRes = await fetch("/admin/stats", { headers: { "Authorization": "Bearer " + token } });
+      const stats = await statsRes.json();
+      document.getElementById("admin-users-count").innerText = stats.totalUsers;
+      document.getElementById("admin-tasks-count").innerText = stats.totalTasks;
+      document.getElementById("admin-wd-count").innerText = stats.pendingWithdrawals;
+
+      const usersRes = await fetch("/admin/users", { headers: { "Authorization": "Bearer " + token } });
+      const usersData = await usersRes.json();
+      document.getElementById("admin-users-list").innerHTML = usersData.users.map(u => `
+        <div class="border border-pink-500 p-2 rounded flex justify-between items-center">
+          <div><b>${u.name}</b> (${u.email}) - Role: ${u.role}</div>
+          <button onclick="deleteUser('${u.id}')" class="text-red-400 underline">Delete</button>
+        </div>
+      `).join('');
+
+      const wdRes = await fetch("/admin/withdrawals", { headers: { "Authorization": "Bearer " + token } });
+      const wdData = await wdRes.json();
+      document.getElementById("admin-wd-list").innerHTML = wdData.withdrawals.map(w => `
+        <div class="border border-pink-500 p-2 rounded flex justify-between items-center">
+          <div><b>${w.name}</b>: ${w.amount_points} pts (${w.gateway}) - Status: ${w.status}</div>
+          ${w.status === 'pending' ? `<button onclick="decideWd('${w.id}', 'approved')" class="text-green-400 underline mr-2">Approve</button><button onclick="decideWd('${w.id}', 'rejected')" class="text-red-400 underline">Reject</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function adminAddTask() {
+      const title = document.getElementById("adm-title").value;
+      const category = document.getElementById("adm-category").value;
+      const reward = parseInt(document.getElementById("adm-reward").value);
+      const link = document.getElementById("adm-link").value;
+
+      const res = await fetch("/admin/tasks", {
+        method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ title, category, reward, link })
+      });
+      if(res.ok) { alert("Task added!"); loadAdminData(); } else { alert("Failed"); }
+    }
+
+    async function deleteUser(id) {
+      if(!confirm("Delete user?")) return;
+      await fetch(`/admin/users/${id}`, { method: "DELETE", headers: { "Authorization": "Bearer " + token } });
+      loadAdminData();
+    }
+
+    async function decideWd(id, status) {
+      await fetch(`/admin/withdrawals/${id}/decide`, {
+        method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ status })
+      });
+      loadAdminData();
+    }
+
+    if(token) initApp();
+  </script>
+</body>
+    </html>
