@@ -89,4 +89,7 @@ function authenticateToken(req, res, next) {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});// Root route so browser shows a friendly welcome message instead of Cannot GET /
+app.get('/', (req, res) => {
+  res.json({ success: true, message: "Task Connect Backend is Live and Running!" });
 });
