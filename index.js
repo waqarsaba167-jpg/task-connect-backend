@@ -1,4 +1,4 @@
-korequire("dotenv").config();
+nokorequire("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
@@ -269,22 +269,19 @@ function showRewardedOrBannerAd() {
 }
 
 // Jab app load ho toh timer start kar dein
-window.onload = function() {
-    startAdTimer();
-};const path = require('path');
+window.onload = function() {// ---------- Start Server ----------
+initSchema().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Task Connect Backend running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error("Failed to initialize database schema:", err);
+});
 
-// Yeh line server ko batati hai ke style.css aur baqi files kahan hain
+const path = require('path');
+
 app.use(express.static(__dirname));
 
-// Yeh line root URL ("/") par naya index.html page dikhaye gi
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});const path = require('path');
-
-// Yeh line server ko batati hai ke style.css aur baqi files kahan hain
-app.use(express.static(__dirname));
-
-// Yeh line root URL ("/") par naya index.html page dikhaye gi
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
