@@ -1,4 +1,4 @@
-// Initial tasks list with multiple categories (Social, Gaming, Math, Spin)
+no// Initial tasks list with multiple categories (Social, Gaming, Math, Spin)
 let tasks = [
   { id: "1", title: "Follow YouTube Channel", category: "YouTube", reward: 100, link: "https://youtube.com" },
   { id: "2", title: "Watch TikTok Viral Video", category: "TikTok", reward: 80, link: "https://tiktok.com" },
@@ -55,4 +55,13 @@ app.post('/chat/messages', authenticateToken, (req, res) => {
   };
   chatMessages.push(newMsg);
   res.json({ success: true, message: newMsg });
+});// Admin: Add or Update Any Custom Setting Dynamically
+app.post('/admin/custom-setting', authenticateToken, (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).json({ error: "Access denied" });
+  const { key, value } = req.body;
+  if (!key) return res.status(400).json({ error: "Setting key is required" });
+
+  // Save dynamically into appSettings object
+  appSettings[key] = value;
+  res.json({ success: true, message: `Setting '${key}' updated successfully!`, settings: appSettings });
 });
