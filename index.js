@@ -23,3 +23,36 @@ app.post('/admin/tasks', authenticateToken, (req, res) => {
   tasks.push(newTask);
   res.json({ success: true, task: newTask });
 });
+let chatMessages = [
+  { id: "1", name: "System", text: "Welcome to Task Connect Community Chat!" }
+];
+
+// Get Chat Messages
+app.get('/chat/messages', authenticateToken, (req, res) => {
+  res.json({ success: true, messages: chatMessages });
+});
+
+// Send Chat Message with Strict Anti-Spam & Warning System
+app.post('/chat/messages', authenticateToken, (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: "Message cannot be empty" });
+
+  // Check for links or phone numbers (spam protection)
+  const hasLink = text.includes("http") || text.includes("www") || text.includes(".com") || text.includes(".net");
+  const hasPhoneNumber = /\d{10,}/.test(text); // Checks if there are 10 or more continuous digits
+
+  if (hasLink || hasPhoneNumber) {
+    // Return automated warning message from System
+    return res.status(400).json({ 
+      error: "⚠️ Warning: Links and phone numbers are not allowed! If you do this again, your account will be blocked." 
+    });
+  }
+
+  const newMsg = {
+    id: Date.now().toString(),
+    name: req.user.name,
+    text
+  };
+  chatMessages.push(newMsg);
+  res.json({ success: true, message: newMsg });
+});
