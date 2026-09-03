@@ -1,4 +1,4 @@
-require("dotenv").config();
+korequire("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
@@ -253,4 +253,22 @@ initSchema().then(() => {
   });
 }).catch(err => {
   console.error("Failed to initialize database schema:", err);
-});
+});// Har 2 minute (120,000 milliseconds) ke baad ad trigger karne ka function
+function startAdTimer() {
+    const TWO_MINUTES = 2 * 60 * 1000; // 2 minutes in milliseconds
+
+    setInterval(() => {
+        // Yahan aap apna AdMob ad show karne wala function call karengi
+        showRewardedOrBannerAd();
+    }, TWO_MINUTES);
+}
+
+function showRewardedOrBannerAd() {
+    console.log("2 minute ho gaye hain, ab ad show ki ja rahi hai.");
+    // AdMob ad trigger logic yahan aayegi
+}
+
+// Jab app load ho toh timer start kar dein
+window.onload = function() {
+    startAdTimer();
+};
