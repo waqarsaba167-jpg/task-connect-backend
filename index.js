@@ -1,4 +1,4 @@
-no// Initial tasks list with multiple categories (Social, Gaming, Math, Spin)
+// Initial tasks list with multiple categories (Social, Gaming, Math, Spin)
 let tasks = [
   { id: "1", title: "Follow YouTube Channel", category: "YouTube", reward: 100, link: "https://youtube.com" },
   { id: "2", title: "Watch TikTok Viral Video", category: "TikTok", reward: 80, link: "https://tiktok.com" },
