@@ -279,4 +279,12 @@ app.use(express.static(__dirname));
 // Yeh line root URL ("/") par naya index.html page dikhaye gi
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});const path = require('path');
+
+// Yeh line server ko batati hai ke style.css aur baqi files kahan hain
+app.use(express.static(__dirname));
+
+// Yeh line root URL ("/") par naya index.html page dikhaye gi
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
