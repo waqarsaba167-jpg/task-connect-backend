@@ -1,4 +1,4 @@
-nokorequire("dotenv").config();
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const { Pool } = require("pg");
+const path = require("path");
 
 // =============================================================================
 // CONFIG
@@ -144,7 +145,6 @@ async function getAllSettings() {
   return { ...SETTINGS_DEFAULTS, ...overrides };
 }
 async function getSetting(key) { return (await getAllSettings())[key]; }
-
 async function pointsToPkr(points) { return Math.round(points * (await getSetting("pkrPerPoint"))); }
 
 // =============================================================================
@@ -246,42 +246,22 @@ app.get("/tasks", requireAuth, ah(async (req, res) => {
   res.json({ tasks: rows.map((r) => ({ ...r, completed: !!r.completed })) });
 }));
 
-// ---------- Start Server ----------
-initSchema().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Task Connect Backend running on port ${PORT}`);
-  });
-}).catch(err => {
-  console.error("Failed to initialize database schema:", err);
-});// Har 2 minute (120,000 milliseconds) ke baad ad trigger karne ka function
-function startAdTimer() {
-    const TWO_MINUTES = 2 * 60 * 1000; // 2 minutes in milliseconds
-
-    setInterval(() => {
-        // Yahan aap apna AdMob ad show karne wala function call karengi
-        showRewardedOrBannerAd();
-    }, TWO_MINUTES);
-}
-
-function showRewardedOrBannerAd() {
-    console.log("2 minute ho gaye hain, ab ad show ki ja rahi hai.");
-    // AdMob ad trigger logic yahan aayegi
-}
-
-// Jab app load ho toh timer start kar dein
-window.onload = function() {// ---------- Start Server ----------
-initSchema().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Task Connect Backend running on port ${PORT}`);
-  });
-}).catch(err => {
-  console.error("Failed to initialize database schema:", err);
-});
-
-const path = require('path');
-
+// =============================================================================
+// FRONTEND STATIC ROUTE
+// =============================================================================
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// =============================================================================
+// START SERVER
+// =============================================================================
+initSchema().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Task Connect Backend running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error("Failed to initialize database schema:", err);
 });
